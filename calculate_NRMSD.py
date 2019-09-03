@@ -15,8 +15,9 @@ import scipy.ndimage.filters as img_filters
 
 
 back_to_back_number = 1000000000
-number_format = "float32"
-bytes_per_pixel = "4"
+number_format = 'float32'
+bytes_per_pixel = '4'
+scanner = 'barrel3'
 
 # FOV size in mm (needed to calculate the matrix size)
 fov_x = 400. 
@@ -57,7 +58,7 @@ def calculate_ideal_phantom (mean_value):
 	
 	phantom [(mat_x/2-phantom_dimx/2) : (mat_x/2+phantom_dimx/2) ,  (mat_y/2-phantom_dimy/2) : (mat_y/2+phantom_dimy/2), (mat_z/2-phantom_dimz/2) : (mat_z/2+phantom_dimz/2)] = ideal_phantom
 		
-	return phantom
+	return phantom, ideal_phantom
 
 
 
@@ -71,14 +72,17 @@ if __name__ == '__main__':
 
 
 
-	ideal_phantom = calculate_ideal_phantom(back_to_back_number / (phantom_dimx * phantom_dimy * phantom_dimz)).flatten()	
+	phantom, ideal_phantom = calculate_ideal_phantom(back_to_back_number / (phantom_dimx * phantom_dimy * phantom_dimz))	
+	ideal_phantom = ideal_phantom.flatten()
 	#print 'ideal_phantom flatten shape: {}'.format(ideal_phantom.shape)
 	
-	pet_images_path = '/home/baran/Desktop/castor_recons/barrel_cubic_phantom/PET_images_AC/PET_images_AC_it'
-	#pet_images_path = '/home/baran/Desktop/castor_recons/barrel_cubic_phantom/PET_images/PET_images_it'
+	pet_images_path = '/home/baran/Desktop/castor_recons/'+scanner+'_cubic_phantom/recon_it'
 	pet_images_ext = '.img'
 	
-	iter_no = 100
+	iter_no = 50
+
+
+	calibration_factor = 100000000000
 
 	iterr = np.linspace(1, iter_no, iter_no)
 	nrmsd = np.zeros(iter_no)
@@ -86,7 +90,13 @@ if __name__ == '__main__':
 	for i in range (1, iter_no+1):
 
 		image_path = pet_images_path + str(i) + pet_images_ext
-		temp_image = np.fromfile(image_path, dtype=number_format).reshape((mat_x,mat_y,mat_z), order = 'F').flatten()
+		temp_image = np.fromfile(image_path, dtype=number_format).reshape((mat_x,mat_y,mat_z), order = 'F')
+		# ONLY PHANTOM IS CONSIDERED
+		temp_image = temp_image[(mat_x/2-phantom_dimx/2) : (mat_x/2+phantom_dimx/2) ,  (mat_y/2-phantom_dimy/2) : (mat_y/2+phantom_dimy/2), (mat_z/2-phantom_dimz/2) : (mat_z/2+phantom_dimz/2)]
+		temp_image = img_filters.gaussian_filter(temp_image,sigma=1).flatten()
+		#print np.shape(temp_image)
+		#print np.shape(ideal_phantom)
+		temp_image = temp_image*calibration_factor
 		if i == 1:
 			temp_value = np.sum(temp_image)/(temp_image.shape[0])
 		#	print temp_value
@@ -101,7 +111,7 @@ if __name__ == '__main__':
 		RMS = np.sqrt(np.sum(np.power(ideal_phantom,2)))
 
 		nrmsd[i-1] = RMSD/RMS
-
+		'''
 		if i == iter_no+2:
 			fig, axs = plt.subplots(2,2)
 
@@ -125,20 +135,20 @@ if __name__ == '__main__':
 			cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
 			fig.colorbar(im1, cax=cbar_ax)
 	
-			plt.show()
-
+		plt.show()
+		'''
 		#print i
 
 
-	print nrmsd
+	#print nrmsd
 
 
 	print 'Optimal number of iteration (min NRMSD): {0}, NRMSD: {1}'.format(np.argmin(nrmsd)+1, nrmsd[np.argmin(nrmsd)])
 
 	plt.plot (iterr, nrmsd, 'ro')
-	plt.axis([0, 100, 0.975, 0.98])
+	plt.axis([0, iter_no, 0.5, 0.7])
 
-	plt.title('NRMSD calculated based on cubic water phantom simulation with 1G primary back-to-back source uniformly distributed within the phantom \n(Gaitanis, Anastasios, et al. "PET image reconstruction: A stopping rule for the MLEM algorithm based on properties of the updating coefficients."\n Computerized Medical Imaging and Graphics 34.2 (2010): 131-141.)' , fontweight="bold")
+	plt.title('NRMSD calculated based on cubic water phantom simulation with 1G primary back-to-back source uniformly distributed within the phantom \n(Gaitanis, Anastasios, et al. "PET image reconstruction: A stopping rule for the MLEM algorithm based on properties of the updating coefficients."\n Computerized Medical Imaging and Graphics 34.2 (2010): 131-141.)\nSETUP: '+scanner , fontweight="bold")
 
 	plt.xlabel('Iteration number' , fontweight="bold")
 	plt.ylabel('NRMSD' , fontweight="bold")

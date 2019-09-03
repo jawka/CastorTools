@@ -36,8 +36,7 @@ if __name__ == '__main__':
 
 
 	os.chdir(sensitivity_dir_path)
-	lm_list = glob.glob('extended_*.root')
-
+	lm_list = glob.glob('sensitivity_results*.root')
 
 	## DATA CONVERSION
 
@@ -47,17 +46,15 @@ if __name__ == '__main__':
 	pl.map (run_shell, lm_list)
 	print "... done!\n"
 
-
-
 	## HEADER CREATION
-
+	
 	all_lm_events = 0
 	counter = 0
 	duration = 0
 	start_time = 0
 	tof_reso = 0
 	list_tof = 0
-
+	
 	print '\nList-mode events counting...' 
 	if not os.path.exists('extended_castor_df.Cdh'):
 		
@@ -118,6 +115,6 @@ if __name__ == '__main__':
 	else:
 		print ' ... extended_castor_df.Cdf list-mode file already exists !!!\n'
 
-
+	
 
 

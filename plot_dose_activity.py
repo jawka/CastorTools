@@ -12,11 +12,11 @@ import matplotlib.pyplot as plt
 from multiprocessing import Pool
 import glob
 import scipy.ndimage.filters as img_filters
-
+from sklearn import preprocessing
 
 back_to_back_number = 1000000000
-number_format = "float32"
-bytes_per_pixel = "4"
+number_format = 'float32'
+bytes_per_pixel = '4'
 
 # FOV size in mm (needed to calculate the matrix size)
 fov_x = 400. 
@@ -56,7 +56,7 @@ dose_dimz = int(phantom_z/dose_voxel_z)
 dose_path_dir = '/home/baran/git/Simulations_GATE/proton_barrel/'
 dose_name = 'dose_phantom' 
 
-image_path = '/home/baran/Desktop/castor_recons/barrel_first_voxel_5_5_5/PET_images/PET_images_it2.img'
+image_path = '/home/baran/Desktop/castor_recons/barrel_beam/recon_TOF_no_smooth/recon_tof_it5.img'
 
 proton_beam_path='/home/baran/git/Simulations_GATE/proton_barrel/ps_actor_phantom'
 positron_map_low_path='/home/baran/git/Simulations_GATE/proton_barrel/positron_map_low'
@@ -109,9 +109,9 @@ def calculate_dose ():
 		im5 = axs[0,2].plot(z_linspace_high, z_dose_high)
 		axs[0,2].set_title("z_dose_high")
 
-		im5 = axs[1,2].plot(z_linspace_low, z_dose_low)
+		im6 = axs[1,2].plot(z_linspace_low, z_dose_low)
 		axs[1,2].set_title("z_dose_low")
-				
+
 		fig.subplots_adjust(right=0.8)	
 		cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
 		fig.colorbar(im1, cax=cbar_ax)	
@@ -120,7 +120,7 @@ def calculate_dose ():
 
 
 	#print z_linspace		
-	return z_dose_low, z_dose_high, z_linspace_low, z_linspace_high
+	return z_dose_low, z_dose_high, z_linspace_low, z_linspace_high, final_dose
 
 # ########################
 # CALCULATE THE RECONSTRUCTED ACTIVITY
@@ -173,7 +173,7 @@ def calculate_reconstructed_activity ():
 
 	#print z_linspace		
 		
-	return z_reconstructed_activity, z_linspace
+	return z_reconstructed_activity, z_linspace, phantom_reconstructed_activity
 
 
 # ########################
@@ -341,20 +341,22 @@ if __name__ == '__main__':
 
 
 	print 'Calculating dose ...'
-	dose_low, dose_high, linspace_dose_low, linspace_dose_high = calculate_dose()
+	dose_low, dose_high, linspace_dose_low, linspace_dose_high, final_dose = calculate_dose()
 	print 'Calculating reconstructed beta profile ...'
-	reconstructed, linspace_recon = calculate_reconstructed_activity()
+	reconstructed, linspace_recon, phantom_reconstructed_activity = calculate_reconstructed_activity()
 	print 'Calculating true beta profile ...'
 	true_low, true_high, linspace_true_low, linspace_true_high = calculate_true_activity()
 	#calculate_true_activity()
-		
+	
+
+	print '.. done!'	
 
 	dose = dose_high
 	x_dose = linspace_dose_high
 	true = true_high
 	x_true = linspace_true_high
 	
-	low = 1	
+	low = 0	
 	if low:
 		dose = dose_low
 		x_dose = linspace_dose_low
@@ -362,30 +364,71 @@ if __name__ == '__main__':
 		x_true = linspace_true_low
 
 
+	
 	fig, ax1 = plt.subplots()
+	print preprocessing.normalize([reconstructed])
+	reconstructed = (reconstructed-min(reconstructed))/(max(reconstructed)-min(reconstructed))
+	true = (true-min(true))/(max(true)-min(true))
+	dose = (dose-min(dose))/(max(dose)-min(dose))
+
 
 	ax1.plot(linspace_recon, reconstructed, color='b', linestyle = '--', linewidth = 3.)
 	ax1.plot(x_true, true, color='g', linestyle = ':', linewidth = 3.)
-	ax1.set_ylim([1,1000000])
-	if low:
-		ax1.set_ylim([1,10000000])
-	ax1.set_xlabel('Phantom position [mm]', fontweight="bold", fontsize = 20)
-	ax1.set_ylabel('Activity [counts]', fontweight="bold", fontsize = 20)
-	ax1.set_title('Reconstructed activity and deposited dose for the proton beam irradiation\nof a 5x5x20cm3 PMMA phantom', fontweight="bold", fontsize = 24)
+	#ax1.set_ylim([1,1000000])
+	#if low:
+	#	ax1.set_ylim([1,10000000])
+	ax1.set_xlabel('Phantom position [mm]', fontweight="bold")#, fontsize = 20)
+	ax1.set_ylabel('Activity [A.U.]', fontweight="bold")#, fontsize = 20)
+	#ax1.set_title('Reconstructed activity and deposited dose for the proton beam irradiation\nof a 5x5x20cm3 PMMA phantom', fontweight="bold", fontsize = 24)
 	ax1.grid(linestyle = ':', linewidth = 0.75, color = 'grey')
- 	ax1.tick_params('x', width=2, labelsize=20)   
-	ax1.tick_params('y', width=2, labelsize=20)   
-	ax1.set_yscale('log')
+ 	ax1.tick_params('x', width=2)#, labelsize=20)   
+	ax1.tick_params('y', width=2)#, labelsize=20)   
+	#ax1.set_yscale('log')
 
 	ax2 = ax1.twinx()    
 	ax2.plot(x_dose, dose, color = 'magenta', linestyle = '-', linewidth = 3.)
-	ax2.set_ylabel('Dose [A.U.]', fontweight="bold", color='magenta', fontsize = 20)
-	ax2.tick_params('y', colors='magenta', width=2, labelsize=20) 
-	ax1.legend(['Reconstructed profile', 'MC activity profile'], loc=2, fontsize = 'x-large')
-	ax2.legend(['Deposited dose'], fontsize = 'x-large')
+	ax2.set_ylabel('Dose [A.U.]', fontweight="bold", color='magenta')#, fontsize = 20)
+	ax2.tick_params('y', colors='magenta', width=2)#, labelsize=20) 
+	ax1.legend([r'Reconstructed $\beta^{+}$ activity', r'Produced $\beta^{+}$ activity'], loc=2)#, fontsize = 25)
+	ax2.legend(['Deposited dose'])#, fontsize = 25)
 
 	plt.show()
+	fig.savefig('plot1_300.pdf', bbox_inches='tight', dpi=300)
 
+	'''
+
+	fig, axs = plt.subplots(2,1)
+
+	print 'Dose grid: {0}'.format(np.shape(final_dose))			
+	print 'Recon grid: {0}'.format(np.shape(phantom_reconstructed_activity))			
+
+	dose_plot = final_dose[:,50,:]
+	recon_plot = phantom_reconstructed_activity[:,5,:]
+	dose_plot = (dose_plot-dose_plot.min())/(dose_plot.max()-dose_plot.min())
+	recon_plot = (recon_plot-recon_plot.min())/(recon_plot.max()-recon_plot.min())
+
+	plt.setp(axs, xticklabels=['a', '-200', '-150', '-100', '-50', '0', '50', '100', '150'], yticklabels=[1])
+
+	im1 = axs[0].imshow(dose_plot, cmap = 'jet')
+	#axs[0].set_title("73")
+	#fig.colorbar(im1, axs[0])
+	axs[0].set_xlabel('Phantom position [mm]', fontweight="bold",)#, fontsize = 20)
+
+	im2 = axs[1].imshow(recon_plot, cmap = 'jet')
+	#axs[1].set_title("73")
+	#fig.colorbar(im2, axs[1], cmap = 'jet')
+	axs[1].set_xlabel('Phantom position [mm]', fontweight="bold")#, fontsize = 20)
+
+	fig.subplots_adjust(right=0.8)	
+	cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
+	fig.colorbar(im1, cax=cbar_ax)	
+
+
+
+	plt.show()	
+	fig.savefig('plot2_600.pdf', bbox_inches='tight', dpi=600)
+	
+	'''
 #	plt.plot (iterr, nrmsd, 'ro')
 #	plt.axis([0, 100, 0.975, 0.98])
 
