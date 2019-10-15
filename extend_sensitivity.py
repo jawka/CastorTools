@@ -8,9 +8,9 @@ import glob
 
 
 sensitivity_dir_path = '/home/baran/git/CastorTools/castor_sensitivity_maps_data/'
-scanner_name = 'barrel2'
+scanner_name = 'dualhead_2x6'
 dir_path = sensitivity_dir_path + scanner_name + "_data/" 
-cpu_pool =  25
+cpu_pool =  35
 extended_sensitivity_list_file = '/home/baran/Desktop/castor_recons/barrel_first_voxel_5_5_5/extended_sensitivity_list.txt'
 
 def run_shell (sensitivity_file):
