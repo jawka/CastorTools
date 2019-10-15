@@ -13,7 +13,7 @@ sensitivity_dir_path = '/home/baran/git/CastorTools/castor_sensitivity_maps_data
 
 tof_flag = 0
 
-cpu_pool =  5
+cpu_pool =  20
 
 def run_shell (sensitivity_file):
 

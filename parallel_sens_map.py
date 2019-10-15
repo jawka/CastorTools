@@ -16,34 +16,38 @@ import glob
 back_to_back_number = 100000000000
 number_format = "float"
 bytes_per_pixel = "4"
-scanner = "cna_lso"
+scanner = "dualhead_2x6"
 
 sensitivity_binary_castor = "/home/baran/git/CastorTools/castor_sensitivity_maps_data/sensitivity_"+scanner+".raw"
 sensitivity_header_castor = "/home/baran/git/CastorTools/castor_sensitivity_maps_data/sensitivity_"+scanner+".hdr"
 
 # FOV size in mm (needed to calculate the matrix size)
 #fov_x = 400. 
-#fov_y = 400. 
-#fov_z = 400. 
+#fov_y = 400.
+#fov_z = 500. 
+# dualhead 2x6
+fov_x = 400. 
+fov_y = 400. 
+fov_z = 600. 
 # dualhead 3x4
 #fov_x = 400. 
 #fov_y = 400. 
 #fov_z = 400. 
 # cnao_lso
-fov_x = 99.2 
-fov_y = 220.8 
-fov_z = 249.6 
+#fov_x = 99.2 
+#fov_y = 220.8 
+#fov_z = 249.6 
 
 
 # VOXEL size in mm (scalling factor: mm/pixel)
-#voxel_x = 5. 
-#voxel_y = 5. 
-#voxel_z = 5. 
+voxel_x = 5. 
+voxel_y = 5. 
+voxel_z = 5. 
 
 # cnao_lso
-voxel_x = 1.6 
-voxel_y = 1.6 
-voxel_z = 1.6 
+#voxel_x = 1.6 
+#voxel_y = 1.6 
+#voxel_z = 1.6 
 
 # MATRIX size 
 mat_x = int(fov_x/voxel_x) 
@@ -127,13 +131,13 @@ def create_sensitivity_parallel (results_path):
 				temp_x = int(entry.sourcePosX1/voxel_x)
 				temp_y = int(entry.sourcePosY1/voxel_y)
 				temp_z = int(entry.sourcePosZ1/voxel_z)
-				if (entry.sourcePosX1 == fov_x/2.):
+				if (entry.sourcePosX1 >= fov_x/2.):
 					print "Source position at the boundary: {0}, {1}, {2}".format(entry.sourcePosX1, entry.sourcePosY1, entry.sourcePosZ1)
 					temp_x -= 1
-				if (entry.sourcePosY1 == fov_y/2.):
+				if (entry.sourcePosY1 >= fov_y/2.):
 					print "Source position at the boundary: {0}, {1}, {2}".format(entry.sourcePosX1, entry.sourcePosY1, entry.sourcePosZ1)
 					temp_y -= 1
-				if (entry.sourcePosZ1 == fov_z/2.):
+				if (entry.sourcePosZ1 >= fov_z/2.):
 					print "Source position at the boundary: {0}, {1}, {2}".format(entry.sourcePosX1, entry.sourcePosY1, entry.sourcePosZ1)
 					temp_z -= 1
 				#if (temp_x >= (mat_x/2) or temp_y >= (mat_y/2) or temp_z >= (mat_z/2)):
@@ -206,7 +210,7 @@ if __name__ == '__main__':
 	print len(maps_list)
 	if not os.path.exists(sens_maps_path+'/sensitivity_maps'):
 		os.mkdir (sens_maps_path+'/sensitivity_maps', 0775)
-	p = Pool(5)
+	p = Pool(35)
 	p.map (create_sensitivity_parallel, maps_list)
 
 	matrix_list = glob.glob(sens_maps_path+'/sensitivity_maps/sens_map_*')
@@ -224,7 +228,7 @@ if __name__ == '__main__':
 	print "Sensitivity matrix min: {}".format(sensitivity.min())
 	print "Sensitivity matrix max: {}\n".format(sensitivity.max())
 
-	#sensitivity[sensitivity < 1] = 1
+	sensitivity[sensitivity < 1] = 1
 
 	sensitivity = sensitivity/prim_per_voxel
 	os.chdir(sens_maps_path)

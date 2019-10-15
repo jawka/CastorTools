@@ -130,9 +130,15 @@ def create_sensitivity_parallel (results_path):
 				print "Source position at the boundary: {0}, {1}, {2}".format(entry.sourcePosX1, entry.sourcePosY1, entry.sourcePosZ1)
 				temp_z -= 1
 			#print "Corresponding matrix coordinates: {0} {1} {2}\n".format( temp_x, temp_y, temp_z)
-			#if (temp_x >= (mat_x/2) or temp_y >= (mat_y/2) or temp_z >= (mat_z/2)):
-			#	print "Source position: {0}, {1}, {2}".format(entry.sourcePosX1, entry.sourcePosY1, entry.sourcePosZ1) 
-			sensitivity[temp_x, temp_y, temp_z] += 1
+			if (temp_x >= (mat_x) or temp_y >= (mat_y) or temp_z >= (mat_z)):
+				print "Source position: {0}, {1}, {2}".format(entry.sourcePosX1, entry.sourcePosY1, entry.sourcePosZ1) 
+				print temp_x
+				print temp_y
+				print temp_z
+				print "Error map: {0}".format(batch_number)
+                
+			else:
+				sensitivity[temp_x, temp_y, temp_z] += 1
 
 	f.Close()
 	plot_flag = 0
@@ -194,10 +200,10 @@ if __name__ == '__main__':
 	maps_list = glob.glob(sens_maps_path+'/*.root')
 #	maps_list = glob.glob(sens_maps_path+'/*.root')[0]   # number 1917
 	print len(maps_list)
-	print maps_list	
+	#print maps_list	
 	if not os.path.exists(sens_maps_path+'/sensitivity_maps'):
 		os.mkdir (sens_maps_path+'/sensitivity_maps', 0775)
-	p = Pool(35)
+	p = Pool(36)
 	p.map (create_sensitivity_parallel, maps_list)
 	#create_sensitivity_parallel (maps_list)
 	matrix_list = glob.glob(sens_maps_path+'/sensitivity_maps/sens_map_*')

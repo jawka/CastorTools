@@ -13,15 +13,14 @@ sensitivity_dir_path = '/home/baran/git/CastorTools/castor_sensitivity_maps_data
 
 tof_flag = 0
 
-cpu_pool =  5
+cpu_pool =  40
 
 def run_shell (sensitivity_file):
 
 	no = sensitivity_file.split('results')[-1].split('.')[0]
 	shell_command = 'castor-GATERootToCastor -t -i ' + sensitivity_file + ' -s ' + castor_scanner + ' -vb 0 -m ~/git/Simulations_GATE/system_matrix_' + gate_scanner + '/' + gate_scanner + '.mac' + ' -o extended_castor_' + no
 	if tof_flag:
-		shell_command = 'castor-GATERootToCastor -t -TOF_reso 500 -i ' + sensitivity_file + ' -s ' + castor_scanner + ' -vb 0 -m ~/git/Simulations_GATE/system_matrix_' + gate_scanner + '/' + gate_scanner + '.mac' + ' -o extended_castor_' + no
-#	print shell_command
+		shell_command = 'castor-GATERootToCastor -t -TOF_reso 200 -i ' + sensitivity_file + ' -s ' + castor_scanner + ' -vb 0 -m ~/git/Simulations_GATE/system_matrix_' + gate_scanner + '/' + gate_scanner + '.mac' + ' -o extended_castor_' + no
 	p(shell_command, bufsize=0, shell=True)
 	
 
@@ -43,7 +42,7 @@ if __name__ == '__main__':
 	print '\nNumber of list-mode files: {}'.format (len(lm_list))
 	print 'Data conversion...' 
 	pl = Pool(cpu_pool)
-	pl.map (run_shell, lm_list)
+	#pl.map (run_shell, lm_list)
 	print "... done!\n"
 
 	## HEADER CREATION
