@@ -33,7 +33,12 @@ def run_shell (sensitivity_file):
 
 if __name__ == '__main__':
 
+	'''
 
+	Script to convert ROOT output to CASToR format based on .geom file.
+	Parallelism used for the splitted simulations to convert and merge the results and speed-up the computation time.
+
+	'''
 
 	os.chdir(sensitivity_dir_path)
 	lm_list = glob.glob('extended_*.root')

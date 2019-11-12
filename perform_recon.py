@@ -137,7 +137,7 @@ if __name__ == '__main__':
 		[scanner_type, vox_x, vox_y, vox_z, dim_x, dim_y, dim_z] = define_castor_scanner()
 		
 		os.chdir(castor_dir)
-		'''
+		
 		## Converting results file to castor format		
 		shell_command = 'castor-GATERootToCastor -ots -src -TOF_reso 500 -i proton_beam_results.root -s ' + scanner_type + ' -vb 0 -m ~/git/Simulations_GATE/system_matrix_' + scanner + '/' + scanner + '.mac' + ' -o results'
 		print 'Converting proton_beam_results.root file to the castor format...'
@@ -172,7 +172,7 @@ if __name__ == '__main__':
 					print shell_command
 					p(shell_command, bufsize=0, shell=True)
 					print '... done!\n'
-		'''			
+				
 		## Performing the reconstruction		
 		shell_command = 'castor-recon -df ./results_df.Cdh -dim ' + str(dim_x) + ',' + str(dim_y) + ',' + str(dim_z) + ' -vox ' + str(vox_x) + ',' + str(vox_y) + ',' + str(vox_z) + ' -fout recon -th 0 -it 10:1 -sens ./atten_sens_it1.hdr -vb 2' 
 		print 'Reconstruction ...'

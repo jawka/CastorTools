@@ -28,8 +28,13 @@ def read_dose_map_hdr(hdr_file):
 
 if __name__ == '__main__':
 	
-	dose_dir_path = '/home/baran/git/Simulations_GATE/patient_positrons'
+	'''
 
+	Script to merge dose maps from splitted simulation
+
+	'''
+
+	dose_dir_path = '/home/baran/git/Simulations_GATE/patient_positrons'
 	
 	os.chdir(dose_dir_path)
 	dose_hdr = glob.glob('*Dose.mhd')

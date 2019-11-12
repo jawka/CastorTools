@@ -16,7 +16,8 @@ number_of_beams = 24
 recon_dir = '/home/baran/Desktop/castor_recons'
 dose_dir = '/home/shared/Gate/dose_maps/proton'
 activity_dir = '/home/shared/Gate/activity_maps/proton'
-
+plt.rcParams["axes.labelweight"] = "bold"
+plt.rcParams["font.weight"] = "bold"
 
 number_format = 'float32'
 bytes_per_pixel = '4'
@@ -35,7 +36,15 @@ dose_voxel_y = .5
 dose_voxel_z = .5
 
 vox_file = 2.5
+
+
 def define_castor_scanner (gantry):
+
+	'''
+
+	Method to set the scanner parameters
+	
+	'''	
 
 	castor_scanner = 'BARREL1'
 	'''
@@ -91,6 +100,14 @@ def sigmoid(x, a, b, c):
 
 def calculate_reconstructed_activity (image_path, gantry):
 
+	'''
+
+	Method to process the reconstructed image to get the activity profile only within the phantom 
+	or within the phantom and 1 cm before (at the entrance of the beam) if the extend_data flag is True
+
+	3D Gaussian filtering is applied prior to the activity profile calculation as the reconstructed images are not smoothed  
+	
+	'''	
 
 	castor_scanner, vox_x, vox_y, vox_z, dim_x, dim_y, dim_z = define_castor_scanner (gantry)
 	fov_x = vox_x*dim_x
@@ -146,12 +163,22 @@ def calculate_reconstructed_activity (image_path, gantry):
 if __name__ == '__main__':
 
 		
+	'''
+
+	Script for automatic analysis of the reconstructed images from the single proton beam irradiation for different scanner setups
+	Depend from the reconstruction grid two options are available: 
+	- 2_5 (2.5 mm^3 cubic reconstruction grid)
+	- 5_0 (5.0 mm^3 cubic reconstruction grid)
+	
+	'''	
+
 	colors_list = ['darkmagenta', 'red', 'green', 'blue', 'gold', 'peru', 'silver', 'darkmagenta', 'red', 'green', 'blue', 'gold', 'peru', 'silver', 'darkmagenta', 'red', 'green', 'blue', 'gold', 'peru', 'silver', 'darkmagenta', 'red', 'green', 'blue']
 	line_type_list = ['.', '>', 'P', 'x', '*', 'o', 'v', '.', '>', 'P', 'x', '*', 'o', 'v', '.', '>', 'P', 'x', '*', 'o', 'v', '.', '>', 'P', 'x']
 
 	scanner_list = ['barrel', 'barrel2', 'barrel3', 'dualhead_1x6', 'dualhead_2x6', 'dualhead_3x4']
 	#scanner_list = ['barrel', 'barrel2', 'barrel3', 'dualhead_1x6', 'dualhead_2x6', 'dualhead_3x4', 'cnao_lso']
 
+	# Output file name with all fit parameters stored - depend from the choosen option
 	f_n = 'var_energy_5_0.txt'
 	if vox_file == 2.5:
 		f_n = 'var_energy_2_5.txt'
@@ -191,7 +218,7 @@ if __name__ == '__main__':
 				print gantry
 				castor_scanner, vox_x, vox_y, vox_z, dim_x, dim_y, dim_z = define_castor_scanner (gantry)
 				fig, ax1 = plt.subplots()
-				fig.set_size_inches(12, 6)
+				fig.set_size_inches(14, 6)
 
 				#Setup the paths
 				temp_dir = 'proton'+str(beam_no)+'_'+gantry
@@ -292,11 +319,11 @@ if __name__ == '__main__':
 					## Plot the entrance fit
 					ax1.plot(fit_x_entrance, sigmoid(fit_x_entrance, *popt_entrance), color='black', linewidth = 1)		
 
-				l1 = 'Reconstructed activity profile: ' + temp_dir
-				l2 = 'Distal fall-off z = {0:.2f} ({1:.2f})'.format(popt_distal[1], perr_distal[1])
+				l1 = 'Reconstructed activity profile'#: ' + temp_dir
+				l2 = 'Reconstructed activity distal \nfall-off position: {0:.2f} ({1:.2f})'.format(popt_distal[1], perr_distal[1])
 				l3 = ' '
 				if plot_all:
-					l3 = 'Entrance fall-off z = {0:.2f} ({1:.2f})'.format(popt_entrance[1], perr_entrance[1])
+					l3 = 'Reconstructed activity entrance fall-off position: {0:.2f} ({1:.2f})'.format(popt_entrance[1], perr_entrance[1])
 					# Calculating difference between fall-offs (dfference between 50% high fall-offs)
 					z_diff = popt_distal[1]-popt_entrance[1]
 					# Calculating sigma of the difference between fall-offs
@@ -308,15 +335,18 @@ if __name__ == '__main__':
 				z_diff_dose_error = np.sqrt(perr_distal[1]*perr_distal[1] + perr_dose[1]*perr_dose[1])
 	
 				# Figure's handling
+
+				f_size = 12	
+				plt.rcParams["axes.labelweight"] = "bold"
 				if plot_all:
-					l4 = 'Fall-offs distance: z_dist = {0:.2f} ({1:.2f})'.format(z_diff, z_diff_error)
+					l4 = 'Fall-offs difference: {0:.2f} ({1:.2f})'.format(z_diff, z_diff_error)
 					ax1.plot([], [], ' ')
-					ax1.legend([l1, l2, l3, l4], loc='upper left')#, fontsize = 25)
+					ax1.legend([l1, l2, l3, l4], loc='lower left', fontsize = f_size)#, fontsize = 25)
 				else:
-					ax1.legend([l1, l2], loc='upper left')#, fontsize = 25)
+					ax1.legend([l1, l2], loc='lower left', fontsize = f_size)#, fontsize = 25)
 				ax2.plot([], [], ' ')
-				l5 = 'Fall-offs distance: z_dist = {0:.2f} ({1:.2f})'.format(z_diff_dose, z_diff_dose_error)
-				ax2.legend(['True activity z = {0:.2f} ({1:.2f})'.format(popt_dose[1], perr_dose[1]), l5], loc='upper right')#, fontsize = 25)
+				l5 = 'Fall-offs difference: {0:.2f} ({1:.2f})'.format(z_diff_dose, z_diff_dose_error)
+				ax2.legend(['Production activity profile', 'Production activity distal fall-off \nposition: {0:.2f} ({1:.2f})'.format(popt_dose[1], perr_dose[1]), l5], loc='upper right', fontsize = f_size)#, fontsize = 25)
 	
 				# Writing to summary file
 				if plot_all:
@@ -336,9 +366,9 @@ if __name__ == '__main__':
 					distal_fit_file = 'distal_fit_2_5_'
 	
 				if plot_all:
-					plt.savefig(distal_entrance_fit_file+temp_dir+'.pdf', dpi = 600, bbox_inches='tight')	
+					plt.savefig(distal_entrance_fit_file+temp_dir+'_1200.pdf', dpi = 1200, bbox_inches='tight')	
 				else:
-					plt.savefig(distal_fit_file+temp_dir+'.pdf', dpi = 600, bbox_inches='tight')
+					plt.savefig(distal_fit_file+temp_dir+'_1200.pdf', dpi = 1200, bbox_inches='tight')
 	
-				plt.show()
+				#plt.show()
 

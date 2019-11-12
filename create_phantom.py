@@ -75,12 +75,6 @@ def save_phantom_to_binary ():
 	#FOR DUALHEAD_3x4 ONLY
 	#phantom [35:45, 35:45, 20:60] = pmma_phantom
 
-
-
-
-
-
-
 	#FOR CNAO INTERPOLATIOM
 
 	#matrix_5mm = np.load("5mm_cubic_voxel.npy")
@@ -119,7 +113,7 @@ def save_phantom_to_binary ():
 			for k in range (0, cnao_pmma.shape[0]):
 
 					ind =   k   +   j*cnao_pmma.shape[0]   +  i*cnao_pmma.shape[0]*cnao_pmma.shape[1]
-# FOR CNAO interpolation
+					# FOR CNAO interpolation
 					pts[ind,0] = -cnao_fov_x/2 + (cnao_voxel_x)*(1 + k) - (cnao_voxel_x/2)
 					pts[ind,1] = -cnao_fov_y/2 + (cnao_voxel_y)*(1 + j) - (cnao_voxel_y/2)
 					pts[ind,2] = -cnao_fov_z/2 + (cnao_voxel_z)*(1 + i) - (cnao_voxel_z/2) 
@@ -129,20 +123,6 @@ def save_phantom_to_binary ():
 	cnao_pmma = linear_interp(pts).reshape(cnao_pmma.shape, order = 'F')
 	#phantom = cnao_pmma
 	
-
-
-
-
-
-
-
-
-
-
-
-
-
-		
 
 	## WATER PHANTOM
 

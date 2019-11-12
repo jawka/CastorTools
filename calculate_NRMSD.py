@@ -71,18 +71,21 @@ def calculate_ideal_phantom (mean_value):
 if __name__ == '__main__':
 
 
+	'''
+
+	Script for calculating the NRMSD to find the optimal number of iterations for the PET reconstruction
+	
+	'''	
 
 	phantom, ideal_phantom = calculate_ideal_phantom(back_to_back_number / (phantom_dimx * phantom_dimy * phantom_dimz))	
 	ideal_phantom = ideal_phantom.flatten()
-	#print 'ideal_phantom flatten shape: {}'.format(ideal_phantom.shape)
 	
 	pet_images_path = '/home/baran/Desktop/castor_recons/'+scanner+'_cubic_phantom/recon_it'
 	pet_images_ext = '.img'
 	
 	iter_no = 50
 
-
-	calibration_factor = 100000000000
+	calibration_factor = 1
 
 	iterr = np.linspace(1, iter_no, iter_no)
 	nrmsd = np.zeros(iter_no)

@@ -15,6 +15,10 @@ extended_sensitivity_list_file = '/home/baran/Desktop/castor_recons/barrel_first
 
 def run_shell (sensitivity_file):
 
+	'''
+	Run the command from the prm code dedicated to produce additional LORs (code available here: https://github.com/jawka/GateTools)
+	'''
+
 	shell_command = 'prm --dir_path ' + dir_path + ' --scanner_name ' + scanner_name + ' --mode 12 --res_blur_mode '  + scanner_name + ' --coincidences_file ' + sensitivity_file 
 	#print shell_command
 	p(shell_command, bufsize=0, shell=True)
@@ -27,6 +31,13 @@ def run_shell (sensitivity_file):
 
 if __name__ == '__main__':
 
+
+	'''
+
+	Script to copy and produce additional LORs to cover whole FOV 
+	in order to produce merged sensitivity and attenuation map	
+
+	'''
 
 	os.chdir(sensitivity_dir_path+scanner_name+'_data/')
 	lm_list = glob.glob('*.root')
