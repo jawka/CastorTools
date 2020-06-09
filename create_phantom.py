@@ -15,8 +15,8 @@ from scipy.interpolate import RegularGridInterpolator, LinearNDInterpolator
 
 number_format = "float"
 bytes_per_pixel = "4"
-scanner = "dualhead"
-phantom_name = "cnao_water_phantom"
+scanner = "barrel"
+phantom_name = "pmma_2_5"
 
 
 phantom_binary_castor = "/home/baran/git/CastorTools/castor_phantoms/"+phantom_name+".raw"
@@ -35,9 +35,9 @@ cnao_fov_y = 220.8
 cnao_fov_z = 249.6 
 
 # VOXEL size in mm (scalling factor: mm/pixel)
-voxel_x = 5. 
-voxel_y = 5. 
-voxel_z = 5. 
+voxel_x = 2.5 
+voxel_y = 2.5 
+voxel_z = 2.5 
 
 # CNAO VOXEL size in mm (scalling factor: mm/pixel)
 cnao_voxel_x = 1.6 
@@ -64,6 +64,7 @@ def save_phantom_to_binary ():
 
 	phantom = np.zeros((mat_x, mat_y, mat_z))
 
+	'''
 	## PMMA PHANTOM
 
 	pmma_HU = 0.10473 # linear attenation coefficient for PMMA in cm-1
@@ -122,38 +123,47 @@ def save_phantom_to_binary ():
 
 	cnao_pmma = linear_interp(pts).reshape(cnao_pmma.shape, order = 'F')
 	#phantom = cnao_pmma
-	
+	'''
+
+
+	## PMMA PHANTOM
+
+	pmma_HU = 0.10473 # linear attenation coefficient for PMMA in cm-1
+	pmma_phantom = np.full((20,20,80), pmma_HU)
+	#print pmma_phantom.shape
+
+	phantom [70:90, 70:90, 60:140] = pmma_phantom
+
+	#FOR DUALHEAD_3x4 ONLY
+	#phantom [70:90, 70:90, 40:120] = pmma_phantom
+
 
 	## WATER PHANTOM
 
 	water_HU = 0.1 # linear attenation coefficient for PMMA in cm-1
-	#water_phantom = np.full((50,50,60), water_HU)
+	water_phantom = np.full((100,100,120), water_HU)
 	#print water_phantom.shape
 	
-	#phantom [15:65, 15:65, 20:80] = water_phantom
+	#phantom [30:130, 30:130, 40:160] = water_phantom
 	#FOR DUALHEAD_3x4 ONLY
-	#phantom [15:65, 15:65, 10:70] = water_phantom
-	#FOR CNAO
-	phantom = np.zeros((cnao_mat_x, cnao_mat_y, cnao_mat_z))
-	water_phantom = np.full((40,100,100), water_HU)
-	phantom [11:51, 19:119, 28:128] = water_phantom
+	#phantom [30:130, 30:130, 20:140] = water_phantom
 
 
 	## TESTING
 
-	test_value = 0.00001 # linear attenation coefficient for PMMA in cm-1
-	test_1_8_phantom = np.full((40,40,50), test_value)
+	#test_value = 0.00001 # linear attenation coefficient for PMMA in cm-1
+	#test_1_8_phantom = np.full((40,40,50), test_value)
 	#print pmma_phantom.shape
 	#phantom [40:, 40:, 50:] = test_1_8_phantom
 
 
 	## SAVING
 
-	print 'Bytes order: {0} (should be \'little\'). If \'big\', bytes swapping will be automatically applied.'.format(sys.byteorder)
+	print('Bytes order: {0} (should be \'little\'). If \'big\', bytes swapping will be automatically applied.'.format(sys.byteorder))
 	if sys.byteorder != 'little':
-		print 'Byte swapping ...'
+		print('Byte swapping ...')
 		sensitivity.byteswap()
-		print 'DONE'
+		print('DONE')
 
 	#np.save(sensitivity_binary_castor, sensitivity)
 	#pmma_phantom.flatten('F').astype('float32').tofile(phantom_binary_castor)
@@ -165,7 +175,7 @@ def save_phantom_to_binary ():
 
 def save_phantom_to_header ():
 
-        with open(phantom_header_castor, "w+") as f:
+	with open(phantom_header_castor, "w+") as f:
 		f.write("!name of data  file :=  {0}\n".format(phantom_name+".raw"))
 		f.write("!total  number  of  images  := 1\n")
 		f.write("imagedata  byte  order :=  LITTLEENDIAN\n")
@@ -183,7 +193,7 @@ def save_phantom_to_header ():
 	
 def save_cnao_phantom_to_header ():
 
-        with open(phantom_header_castor, "w+") as f:
+	with open(phantom_header_castor, "w+") as f:
 		f.write("!name of data  file :=  {0}\n".format(phantom_name+".raw"))
 		f.write("!total  number  of  images  := 1\n")
 		f.write("imagedata  byte  order :=  LITTLEENDIAN\n")
@@ -211,7 +221,7 @@ if __name__ == '__main__':
 
 
 	save_phantom_to_binary()
-	#save_phantom_to_header()
-	save_cnao_phantom_to_header()
+	save_phantom_to_header()
+	#save_cnao_phantom_to_header()
 	
 

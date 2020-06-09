@@ -11,8 +11,8 @@ number_format = "float"
 scanner = 'ct_interpolation_test'
 bytes_per_pixel = "4"
 
-patient_ct_binary = '/home/baran/git/Simulations_GATE/CT_data/G3P028E0_CT_crop.raw'
-patient_ct_header = '/home/baran/git/Simulations_GATE/CT_data/G3P028E0_CT_crop.mhd'
+patient_ct_binary = '/home/baran/git/Simulations_GATE/CT_data/cirs_modified_for_ac.raw'
+patient_ct_header = '/home/baran/git/Simulations_GATE/CT_data/cirs_modified.mhd'
 
 # FOV size in mm (needed to calculate the matrix size)
 fov_x = 400. 
@@ -47,21 +47,21 @@ cnao_mat_y = int(cnao_fov_y/cnao_voxel_y)
 cnao_mat_z = int(cnao_fov_z/cnao_voxel_z)
 
 #CT DATA
-ct_voxel_x = 0.683594 
-ct_voxel_y = 0.683594 
+ct_voxel_x = 0.9765625 
+ct_voxel_y = 0.9765625 
 ct_voxel_z = 1.2
 
 ct_mat_x = 512 
-ct_mat_y = 415
-ct_mat_z = 252
+ct_mat_y = 512
+ct_mat_z = 202
 
-isocenter_x = -0.7 
-isocenter_y = -248.1
-isocenter_z = -642.3
+isocenter_x = -20.0 
+isocenter_y = -230.0
+isocenter_z = -390.0
 
-offset_x = -174.658
-offset_y = -352.971
-offset_z = -845.1
+offset_x = -249.512
+offset_y = -478.512
+offset_z = -530.2
 
 
 # ########################
@@ -71,11 +71,11 @@ offset_z = -845.1
 def load_and_convert_ct_to_lac():
 
 	print 'Loading CT ...'
-	ct = np.fromfile(patient_ct_binary, dtype='int16').reshape((ct_mat_x, ct_mat_y, ct_mat_z), order = 'F')
+	ct = np.fromfile(patient_ct_binary, dtype='float32').reshape((ct_mat_x, ct_mat_y, ct_mat_z), order = 'F')
 	print '... done!'
 	print 'CT to umap transformation ...'
 	ct_offset = -1000
-	ct = ct - ct_offset
+#	ct = ct - ct_offset
 	umap = np.zeros((ct.shape))
 	#print umap.shape	
 	#print np.min(ct)
@@ -85,14 +85,17 @@ def load_and_convert_ct_to_lac():
 	# Below the breaking point: u = below_a*(HU+1000)
 	# Above the breaking point: u = above_a*(HU+1000) + above_b
 	# Check if loaded CT is already from 0 HU or from -1000 HU
-	break_point = 1047	
+	break_point = 47	
+#	break_point = 1047	
 	below_a = 9.6E-5
 	below_b = 0.0
 	above_a = 5.10E-5
 	above_b = 4.71E-2
 	
-	umap1 = below_a*ct+below_b
-	umap2 = above_a*ct+above_b
+	umap1 = below_a*(ct-ct_offset)+below_b
+	umap2 = above_a*(ct-ct_offset)+above_b
+#	umap1 = below_a*ct+below_b
+#	umap2 = above_a*ct+above_b
 	umap[ct<break_point] = umap1[ct<break_point]
 	umap[ct>=break_point] = umap2[ct>=break_point]
 	print '... done!'
@@ -137,7 +140,7 @@ def save_umap_to_binary (umap):
 	rescaled_umap = linear_interp(pts_normal).reshape(rescaled_umap_normal.shape, order = 'F')
 
 	# SAVING NEW umap
-	rescaled_umap.flatten('F').astype('float32').tofile('rescaled_umap.raw')
+	rescaled_umap.flatten('F').astype('float32').tofile('rescaled_cirs_umap.raw')
 	print '... done!'
 
 # DUALHEAD_3x4 SETUP
@@ -162,7 +165,7 @@ def save_umap_to_binary (umap):
 	rescaled_umap = linear_interp(pts_normal).reshape(rescaled_umap_dualhead_3x4.shape, order = 'F')
 
 	# SAVING NEW umap
-	rescaled_umap.flatten('F').astype('float32').tofile('rescaled_umap_dualhead_3x4.raw')
+	rescaled_umap.flatten('F').astype('float32').tofile('rescaled_cirs_umap_dualhead_3x4.raw')
 	print '... done!'
 
 # CNAO SETUP
@@ -187,7 +190,7 @@ def save_umap_to_binary (umap):
 	rescaled_umap = linear_interp(pts_cnao).reshape(cnao_umap.shape, order = 'F')
 
 	# SAVING NEW umap
-	rescaled_umap.flatten('F').astype('float32').tofile('rescaled_umap_cnao_lso.raw')
+	rescaled_umap.flatten('F').astype('float32').tofile('rescaled_cirs_umap_cnao_lso.raw')
 
 	print '... done!'
 
@@ -197,7 +200,7 @@ def save_umap_to_binary (umap):
 def save_rescaled_umap_to_header ():
 
         with open('rescaled_umap.hdr', "w+") as f:
-		f.write("!name of data  file :=  {0}\n".format("rescaled_umap.raw"))
+		f.write("!name of data  file :=  {0}\n".format("rescaled_cirs_umap.raw"))
 		f.write("!total  number  of  images  := 1\n")
 		f.write("imagedata  byte  order :=  LITTLEENDIAN\n")
 		f.write("number  of  dimensions  := 3\n")
@@ -214,7 +217,7 @@ def save_rescaled_umap_to_header ():
 def save_rescaled_umap_dualhead_3x4_to_header ():
 
         with open('rescaled_umap_dualhead_3x4.hdr', "w+") as f:
-		f.write("!name of data  file :=  {0}\n".format("rescaled_umap_dualhead_3x4.raw"))
+		f.write("!name of data  file :=  {0}\n".format("rescaled_cirs_umap_dualhead_3x4.raw"))
 		f.write("!total  number  of  images  := 1\n")
 		f.write("imagedata  byte  order :=  LITTLEENDIAN\n")
 		f.write("number  of  dimensions  := 3\n")
@@ -231,7 +234,7 @@ def save_rescaled_umap_dualhead_3x4_to_header ():
 def save_cnao_umap_to_header ():
 
         with open('rescaled_umap_cnao_lso.hdr', "w+") as f:
-		f.write("!name of data  file :=  {0}\n".format("rescaled_umap_cnao_lso.raw"))
+		f.write("!name of data  file :=  {0}\n".format("rescaled_cirs_umap_cnao_lso.raw"))
 		f.write("!total  number  of  images  := 1\n")
 		f.write("imagedata  byte  order :=  LITTLEENDIAN\n")
 		f.write("number  of  dimensions  := 3\n")
@@ -259,6 +262,6 @@ if __name__ == '__main__':
 	save_umap_to_binary(umap)
 	save_rescaled_umap_to_header()
 	save_rescaled_umap_dualhead_3x4_to_header()
-	save_cnao_umap_to_header()
+#	save_cnao_umap_to_header()
 	
 

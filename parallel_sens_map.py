@@ -22,13 +22,13 @@ sensitivity_binary_castor = "/home/baran/git/CastorTools/castor_sensitivity_maps
 sensitivity_header_castor = "/home/baran/git/CastorTools/castor_sensitivity_maps_data/sensitivity_"+scanner+".hdr"
 
 # FOV size in mm (needed to calculate the matrix size)
-#fov_x = 400. 
-#fov_y = 400.
-#fov_z = 500. 
-# dualhead 2x6
 fov_x = 400. 
-fov_y = 400. 
+fov_y = 400.
 fov_z = 600. 
+# dualhead 2x6
+#fov_x = 400. 
+#fov_y = 400. 
+#fov_z = 500. 
 # dualhead 3x4
 #fov_x = 400. 
 #fov_y = 400. 
@@ -40,9 +40,9 @@ fov_z = 600.
 
 
 # VOXEL size in mm (scalling factor: mm/pixel)
-voxel_x = 5. 
-voxel_y = 5. 
-voxel_z = 5. 
+voxel_x = 2.5 
+voxel_y = 2.5 
+voxel_z = 2.5 
 
 # cnao_lso
 #voxel_x = 1.6 
@@ -97,7 +97,6 @@ def create_sensitivity_parallel (results_path):
 
 
 	batch_number = results_path.split('/')[-1].split('results')[-1].split('.')[0]
-	
 	compressed_sensitivity = np.zeros((mat_x/2, mat_y/2, mat_z/2))
 
 	try:
@@ -149,8 +148,8 @@ def create_sensitivity_parallel (results_path):
 			random += 1
 
 
-	compressed_file = sens_maps_path+'/sensitivity_maps/comp_map_{0}'.format(batch_number)	
-	np.save(compressed_file, compressed_sensitivity)
+#	compressed_file = sens_maps_path+'/sensitivity_maps/comp_map_{0}'.format(batch_number)	
+#	np.save(compressed_file, compressed_sensitivity)
 
 	f.Close()
 
@@ -206,11 +205,11 @@ if __name__ == '__main__':
 	## SENSITIVITY MAPS PROCESSING
 
 
-	maps_list = glob.glob(sens_maps_path+'/*.root')
+	maps_list = glob.glob(sens_maps_path+'/sensitivity*.root')
 	print len(maps_list)
 	if not os.path.exists(sens_maps_path+'/sensitivity_maps'):
 		os.mkdir (sens_maps_path+'/sensitivity_maps', 0775)
-	p = Pool(35)
+	p = Pool(12)
 	p.map (create_sensitivity_parallel, maps_list)
 
 	matrix_list = glob.glob(sens_maps_path+'/sensitivity_maps/sens_map_*')
@@ -229,6 +228,8 @@ if __name__ == '__main__':
 	print "Sensitivity matrix max: {}\n".format(sensitivity.max())
 
 	sensitivity[sensitivity < 1] = 1
+	# only for dualhead_2x6
+	#sensitivity = sensitivity[:, :, 20:220]
 
 	sensitivity = sensitivity/prim_per_voxel
 	os.chdir(sens_maps_path)

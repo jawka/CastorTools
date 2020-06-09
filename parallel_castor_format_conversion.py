@@ -7,13 +7,13 @@ import numpy as np
 import glob
 
 
-castor_scanner = 'CNAO_LSO'
-gate_scanner = 'cnao_lso'
+castor_scanner = 'BARREL3'
+gate_scanner = 'barrel3'
 sensitivity_dir_path = '/home/baran/git/CastorTools/castor_sensitivity_maps_data/' + gate_scanner + '_data/'
 
 tof_flag = 0
 
-cpu_pool =  20
+cpu_pool =  10
 
 def run_shell (sensitivity_file):
 

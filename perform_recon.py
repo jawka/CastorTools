@@ -9,7 +9,7 @@ import numpy as np
 import glob
 
 
-scanner = 'barrel'
+scanner = 'dualhead_3x4'
 number_of_beams = 7
 simulations_repo = '/home/baran/git/Simulations_GATE'
 recon_dir = '/home/baran/Desktop/castor_recons'
@@ -18,8 +18,8 @@ cnao_fov_x = 99.2
 cnao_fov_y = 220.8 
 cnao_fov_z = 249.6 
 
-#analysis_type = 'var_energy'
-analysis_type = 'one_energy'
+analysis_type = 'var_energy'
+#analysis_type = 'one_energy'
 
 root_results = 'proton_beam_results.root'
 
@@ -35,7 +35,7 @@ fov_z = 500.
 def define_castor_scanner ():
 
 	castor_scanner = 'BARREL1'
-	'''
+	
 	vox_x = 2.5
 	vox_y = 2.5
 	vox_z = 2.5
@@ -49,7 +49,7 @@ def define_castor_scanner ():
 	dim_x = 80
 	dim_y = 80
 	dim_z = 100
-
+	'''
 	if scanner == 'cnao_lso':
 		castor_scanner = 'CNAO_LSO'
 		vox_x = 1.6
@@ -70,13 +70,13 @@ def define_castor_scanner ():
 
 	if scanner == 'dualhead_2x6':
 		castor_scanner = 'DUALHEAD_2x6'
-		#dim_z = 200
-		dim_z = 100
+		dim_z = 200
+		#dim_z = 100
 
 	if scanner == 'dualhead_3x4':
 		castor_scanner = 'DUALHEAD_3x4'
-		#dim_z = 160
-		dim_z = 80
+		dim_z = 160
+		#dim_z = 80
 
 	return castor_scanner, vox_x, vox_y, vox_z, dim_x, dim_y, dim_z
 
@@ -138,7 +138,8 @@ if __name__ == '__main__':
 		
 		os.chdir(castor_dir)
 		
-		## Converting results file to castor format		
+		## Converting results file to castor format
+		'''		
 		shell_command = 'castor-GATERootToCastor -ots -src -TOF_reso 500 -i proton_beam_results.root -s ' + scanner_type + ' -vb 0 -m ~/git/Simulations_GATE/system_matrix_' + scanner + '/' + scanner + '.mac' + ' -o results'
 		print 'Converting proton_beam_results.root file to the castor format...'
 		print shell_command
@@ -146,6 +147,7 @@ if __name__ == '__main__':
 		print '... done!\n'
 
 		print glob.glob('ac_*.hdr')
+		
 		## Performing the atten_sens recon if needed		
 		if (not os.path.exists('atten_sens_2_5_it1.hdr') or not os.path.exists('atten_sens_2_5_it1.img')):
 			
@@ -173,8 +175,9 @@ if __name__ == '__main__':
 					p(shell_command, bufsize=0, shell=True)
 					print '... done!\n'
 				
+		'''
 		## Performing the reconstruction		
-		shell_command = 'castor-recon -df ./results_df.Cdh -dim ' + str(dim_x) + ',' + str(dim_y) + ',' + str(dim_z) + ' -vox ' + str(vox_x) + ',' + str(vox_y) + ',' + str(vox_z) + ' -fout recon -th 0 -it 10:1 -sens ./atten_sens_it1.hdr -vb 2' 
+		shell_command = 'castor-recon -df ./results_df.Cdh -dim ' + str(dim_x) + ',' + str(dim_y) + ',' + str(dim_z) + ' -vox ' + str(vox_x) + ',' + str(vox_y) + ',' + str(vox_z) + ' -fout recon_2_5 -th 1 -it 10:1 -sens ./atten_sens_2_5_it1.hdr -vb 2' 
 		print 'Reconstruction ...'
 		print shell_command
 		p(shell_command, bufsize=0, shell=True)

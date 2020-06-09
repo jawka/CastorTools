@@ -17,16 +17,17 @@ import glob
 back_to_back_number = 100000000000
 number_format = "float"
 bytes_per_pixel = "4"
-scanner = "barrel"
+scanner = "dualhead_3x4"
+vmax_value= 0.12
 phantom_name = "pmma_5_5_20_cm_shifted"
 
-sensitivity_binary_castor = "/home/baran/git/CastorTools/castor_sensitivity_maps/sensitivity_"+scanner+".raw"
-sensitivity_header_castor = "/home/baran/git/CastorTools/castor_sensitivity_maps/sensitivity_"+scanner+".hdr"
+sensitivity_binary_castor = "/home/baran/git/CastorTools/castor_sensitivity_maps_data/sensitivity_"+scanner+".raw"
+sensitivity_header_castor = "/home/baran/git/CastorTools/castor_sensitivity_maps_data/sensitivity_"+scanner+".hdr"
 
 # FOV size in mm (needed to calculate the matrix size)
 fov_x = 400. 
 fov_y = 400. 
-fov_z = 500. 
+fov_z = 400. 
 
 # VOXEL size in mm (scalling factor: mm/pixel)
 voxel_x = 5. 
@@ -42,7 +43,7 @@ mat_z = int(fov_z/voxel_z)
 prim_per_voxel = float(back_to_back_number)/(mat_x*mat_y*mat_z)
 
 # Maps path
-sens_maps_path= '/home/baran/git/CastorTools/castor_sensitivity_maps/barrel_data'
+sens_maps_path= '/home/baran/git/CastorTools/castor_sensitivity_maps_data/'+scanner+'_data'
 
 
 
@@ -71,7 +72,7 @@ if __name__ == '__main__':
 
 	fig, axs = plt.subplots(2,3)
 
-	im1 = axs[0,0].imshow(sensitivity[:,:,0], vmin=0.0001, vmax=0.04, cmap='jet')#, norm = LogNorm())
+	im1 = axs[0,0].imshow(sensitivity[:,:,0], vmin=0.0001, vmax=vmax_value, cmap='jet')#, norm = LogNorm())
 	axs[0,0].set_title("Transaxial (xy) plane  Z=-25. cm",fontweight="bold")
 	axs[0,0].invert_yaxis()
 	axs[0,0].set_xticklabels(["","-20","-15","-10","-5","0","5","10","15","20"])
@@ -80,7 +81,7 @@ if __name__ == '__main__':
 	axs[0,0].set_ylabel("Y position of the scanner [cm]")
 	#fig.colorbar(im1, axs[0,0])
 	
-	im2 = axs[0,1].imshow(sensitivity[:,:,25], vmin=0.0001, vmax=0.04, cmap='jet')#, norm = LogNorm())
+	im2 = axs[0,1].imshow(sensitivity[:,:,25], vmin=0.0001, vmax=vmax_value, cmap='jet')#, norm = LogNorm())
 	axs[0,1].set_title("Transaxial (xy) plane: Z=-12.5 cm",fontweight="bold")
 	axs[0,1].invert_yaxis()
 	axs[0,1].set_xticklabels(["","-20","-15","-10","-5","0","5","10","15","20"])
@@ -89,7 +90,7 @@ if __name__ == '__main__':
 	axs[0,1].set_ylabel("Y position of the scanner [cm]")
 	#fig.colorbar(im2, axs[0,1])
 
-	im3 = axs[1,0].imshow(sensitivity[:,:,35], vmin=0.0001, vmax=0.04, cmap='jet')#, norm = LogNorm())
+	im3 = axs[1,0].imshow(sensitivity[:,:,35], vmin=0.0001, vmax=vmax_value, cmap='jet')#, norm = LogNorm())
 	axs[1,0].set_title("Transaxial (xy) plane: Z=-7.5 cm",fontweight="bold")
 	axs[1,0].invert_yaxis()
 	axs[1,0].set_xticklabels(["","-20","-15","-10","-5","0","5","10","15","20"])
@@ -98,7 +99,7 @@ if __name__ == '__main__':
 	axs[1,0].set_ylabel("Y position of the scanner [cm]")
 	#fig.colorbar(im3, axs[1,0])
 
-	im4 = axs[1,1].imshow(sensitivity[:,:,50], vmin=0.0001, vmax=0.04, cmap='jet')#, norm = LogNorm())
+	im4 = axs[1,1].imshow(sensitivity[:,:,mat_z/2-1], vmin=0.0001, vmax=vmax_value, cmap='jet')#, norm = LogNorm())
 	axs[1,1].set_title("Transaxial (xy) plane: Z=0. cm",fontweight="bold")
 	axs[1,1].invert_yaxis()
 	axs[1,1].set_xticklabels(["","-20","-15","-10","-5","0","5","10","15","20"])
@@ -107,7 +108,7 @@ if __name__ == '__main__':
 	axs[1,1].set_ylabel("Y position of the scanner [cm]")
 	#fig.colorbar(im4, axs[1,1])
 
-	im5 = axs[0,2].imshow(sensitivity[39,:,:], vmin=0.0001, vmax=0.04, cmap='jet')#, norm = LogNorm())
+	im5 = axs[0,2].imshow(sensitivity[39,:,:], vmin=0.0001, vmax=vmax_value, cmap='jet')#, norm = LogNorm())
 	axs[0,2].set_title("Axial (zy) plane: X = 0.0 cm",fontweight="bold")
 	axs[0,2].invert_yaxis()
 	axs[0,2].set_xticklabels(["","-25","-15","-5","5","15"])
@@ -116,7 +117,7 @@ if __name__ == '__main__':
 	axs[0,2].set_ylabel("Y position of the scanner [cm]")
 	#fig.colorbar(im5, axs[0,2])
 
-	im6 = axs[1,2].imshow(sensitivity[:,39,:], vmin=0.0001, vmax=0.04, cmap='jet')#, norm = LogNorm())
+	im6 = axs[1,2].imshow(sensitivity[:,39,:], vmin=0.0001, vmax=vmax_value, cmap='jet')#, norm = LogNorm())
 	axs[1,2].set_title("Axial (zx) plane: Y=0.0 cm",fontweight="bold")
 	axs[1,2].invert_yaxis()
 	axs[1,2].set_xticklabels(["","-25","-15","-5","5","15"])

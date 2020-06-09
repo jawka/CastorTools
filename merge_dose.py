@@ -34,7 +34,7 @@ if __name__ == '__main__':
 
 	'''
 
-	dose_dir_path = '/home/baran/git/Simulations_GATE/patient_positrons'
+	dose_dir_path = '/home/baran/git/Simulations_GATE/cirs_150_00_positrons'
 	
 	os.chdir(dose_dir_path)
 	dose_hdr = glob.glob('*Dose.mhd')
@@ -43,7 +43,7 @@ if __name__ == '__main__':
 	matrix_size, voxel_size = read_dose_map_hdr(dose_hdr[0])
 	sum_dose = np.zeros((matrix_size))
 
-	for ff in range(1,21):
+	for ff in range(1,33):
 		if os.path.exists('dose'+str(ff)+'-Dose.raw'):
 			print ff
 			temp_dose = np.fromfile('dose'+str(ff)+'-Dose.raw', dtype = 'float32').reshape(matrix_size)
